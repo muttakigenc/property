@@ -126,8 +126,8 @@ class has_greater_equal<T, U, void_t<decltype(declval<T&&>() >= declval<U&&>())>
 // Bir sýnýfýn operator[]'e sahip olup olmadýðýný kontrol eden yardýmcý þablon
 template<typename, typename, typename = void>
 class has_subscript : public false_type {};
-template<typename T, typename... Args>
-class has_subscript<T, tuple<Args...>, void_t<decltype(declval<T&&>()[declval<Args&&>()...])>> : public true_type {};
+template<typename T, typename U>
+class has_subscript<T, U, void_t<decltype(declval<T&&>()[declval<U&&>()])>> : public true_type {};
 
 // Bir sýnýfýn operator()'e sahip olup olmadýðýný kontrol eden yardýmcý þablon
 template<typename, typename, typename = void>

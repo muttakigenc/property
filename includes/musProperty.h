@@ -36,7 +36,7 @@ concept IsThisPointer = is_same_v<remove_pointer_t<remove_cvref_t<T>>, ClassType
 //concept IsThisPointer = is_same_v<remove_cvref_t<T>, ClassType> && is_pointer_v<T>;
 
 template<auto Getter, auto Setter = nullptr, auto MoveSetter=Setter>
-	requires(is_member_function_pointer_v<decltype(Getter)> && (Setter == nullptr || is_member_function_pointer_v<decltype(Setter)>))
+	requires(is_member_function_pointer_v<decltype(Getter)> && (std::is_same_v<decltype(Setter), std::nullptr_t> || is_member_function_pointer_v<decltype(Setter)>))
 class Property {
 	template<class T>
 	class GetterInfo;
@@ -374,20 +374,20 @@ public:
 		return move(get() >> value);
 	}
 
-	template<Arithmetic... U>
+	template<Arithmetic U>
 		requires (
-	has_subscript<ValueType, tuple<U&&...>>::value
+	has_subscript<ValueType, U&&>::value
 		)
-		inline auto&& operator[](U&&... values) {
-		return move(get()[forward<U&&>(values)...]);
+		inline auto&& operator[](U&& values) {
+		return move(get()[forward<U&&>(values)]);
 	}
 
-	template<Arithmetic... U>
+	template<Arithmetic U>
 		requires (
-	has_subscript<ValueType, tuple<U&...>>::value
+	has_subscript<ValueType, U&>::value
 		)
-		inline auto&& operator[](U&... values) {
-		return move(get()[forward<U&>(values)...]);
+		inline auto&& operator[](U& values) {
+		return move(get()[forward<U&>(values)]);
 	}
 
 
