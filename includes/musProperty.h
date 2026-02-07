@@ -62,8 +62,14 @@ public:
 	using ClassType = GetterInfo<decltype(Getter)>::ClassType;
 	using GetterType = GetterInfo<decltype(Getter)>::ReturnType;
 	using ValueType = remove_reference<GetterType>::type;
+	using ReturnType = std::conditional_t<
+		std::is_lvalue_reference_v<GetterType>,
+		GetterType,  // Eðer T& dönüyorsa, T& olarak kalsýn (Referans performansý)
+		ValueType    // Eðer T dönüyorsa, T olarak kalsýn (Atomic/Copy desteði)
+	>;
+
 	friend ClassType;
-private:
+protected:
 
 	Property(ClassType * instance) : instance_(*instance) {}
 
@@ -73,11 +79,11 @@ public:
 		requires(S != nullptr)
 	Property(ClassType& instance, const ValueType& value) : instance_(instance) { set(value); }
 
-	inline ValueType& get() & {
+	inline ReturnType get() & {
 		return (instance_.*Getter)();
 	}
 
-	inline ValueType& get() const & {
+	inline ReturnType get() const & {
 		return (instance_.*Getter)();
 	}
 
@@ -127,11 +133,11 @@ public:
 
 
 
-	inline operator ValueType& () {
+	inline operator ReturnType () {
 		return get();
 	}
 
-	inline operator const ValueType& () const {
+	inline operator const ReturnType () const {
 		return get();
 	}
 
